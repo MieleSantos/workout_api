@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 
 from workout_api.atleta.models import AtletaModel
-from workout_api.atleta.schemas import AtletaIn, AtletaOut, AtletaUpdate
+from workout_api.atleta.schemas import AtletaGetOut, AtletaIn, AtletaOut, AtletaUpdate
 from workout_api.categorias.models import CategoriaModel
 from workout_api.centro_treinamento.models import CentroTreinamentoModel
 from workout_api.contrib.dependencies import DatabaseDependency
@@ -96,13 +96,13 @@ async def post(
     "/",
     summary="Consultar todos os Atletas",
     status_code=status.HTTP_200_OK,
-    response_model=LimitOffsetPage[AtletaOut],
+    response_model=LimitOffsetPage[AtletaGetOut],
 )
-async def query(db_session: DatabaseDependency) -> LimitOffsetPage[AtletaOut]:
-    atletas: list[AtletaOut] = (
+async def query(db_session: DatabaseDependency) -> LimitOffsetPage[AtletaGetOut]:
+    atletas: list[AtletaGetOut] = (
         (await db_session.execute(select(AtletaModel))).scalars().all()
     )
-    atletas_pag = [AtletaOut.model_validate(atleta) for atleta in atletas]
+    atletas_pag = [AtletaGetOut.model_validate(atleta) for atleta in atletas]
 
     return paginate(atletas_pag)
 
