@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
 from sqlalchemy.future import select
-
+from sqlalchemy.exc import IntegrityError
 from workout_api.centro_treinamento.models import CentroTreinamentoModel
 from workout_api.centro_treinamento.schemas import (
     CentroTreinamentoIn,
@@ -32,9 +32,14 @@ async def post(
     centro_treinamento_model = CentroTreinamentoModel(
         **centro_treinamento_out.model_dump()
     )
-
-    db_session.add(centro_treinamento_model)
-    await db_session.commit()
+    try:
+        db_session.add(centro_treinamento_model)
+        await db_session.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento_out.nome}",
+        )
 
     return centro_treinamento_out
 
@@ -102,8 +107,14 @@ async def patch(
     for key, value in centro_treinamento_update.items():
         setattr(centro_treinamento, key, value)
 
-    await db_session.commit()
-    await db_session.refresh(centro_treinamento)
+    try:
+        await db_session.commit()
+        await db_session.refresh(centro_treinamento)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento.nome}",
+        )
 
     return centro_treinamento
 

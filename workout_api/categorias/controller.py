@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
 from sqlalchemy.future import select
-
+from sqlalchemy.exc import IntegrityError
 from workout_api.categorias.models import CategoriaModel
 from workout_api.categorias.schemas import CategoriaIn, CategoriaOut
 from workout_api.contrib.dependencies import DatabaseDependency
@@ -23,9 +23,14 @@ async def post(
 ) -> CategoriaOut:
     categoria_out = CategoriaOut(id=uuid4(), **categoria_in.model_dump())
     categoria_model = CategoriaModel(**categoria_out.model_dump())
-
-    db_session.add(categoria_model)
-    await db_session.commit()
+    try:
+        db_session.add(categoria_model)
+        await db_session.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe uma categoria cadastrado com o nome: {categoria_in.nome}",
+        )
 
     return categoria_out
 
@@ -90,10 +95,14 @@ async def patch(
     categoria_update = categoria_up.model_dump(exclude_unset=True)
     for key, value in categoria_update.items():
         setattr(categoria, key, value)
-
-    await db_session.commit()
-    await db_session.refresh(categoria)
-
+    try:
+        await db_session.commit()
+        await db_session.refresh(categoria)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe uma categoria cadastrado com o nome: {categoria_up.nome}",
+        )
     return categoria
 
 

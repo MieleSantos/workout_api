@@ -5,6 +5,7 @@ from fastapi import APIRouter, Body, HTTPException, Query, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
 from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
 
 from workout_api.atleta.models import AtletaModel
 from workout_api.atleta.schemas import AtletaIn, AtletaOut, AtletaUpdate
@@ -77,6 +78,11 @@ async def post(
 
         db_session.add(atleta_model)
         await db_session.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe um atleta cadastrado com o cpf: {cpf}",
+        )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -147,10 +153,14 @@ async def patch(
     atleta_update = atleta_up.model_dump(exclude_unset=True)
     for key, value in atleta_update.items():
         setattr(atleta, key, value)
-
-    await db_session.commit()
-    await db_session.refresh(atleta)
-
+    try:
+        await db_session.commit()
+        await db_session.refresh(atleta)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=f"Já existe um atleta cadastrado com o cpf: {atleta.cpf}",
+        )
     return atleta
 
 
