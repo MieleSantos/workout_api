@@ -4,8 +4,8 @@ from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, Query, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
-from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
 
 from workout_api.atleta.models import AtletaModel
 from workout_api.atleta.schemas import AtletaGetOut, AtletaIn, AtletaOut, AtletaUpdate
@@ -17,15 +17,15 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
-    summary="Criar um novo atleta",
+    '/',
+    summary='Criar um novo atleta',
     status_code=status.HTTP_201_CREATED,
     response_model=AtletaOut,
 )
 async def post(
     db_session: DatabaseDependency,
-    nome: str = Query(description="Nome do Atleta"),
-    cpf: str = Query(description="Cpf do atleta"),
+    nome: str = Query(description='Nome do Atleta'),
+    cpf: str = Query(description='Cpf do atleta'),
     atleta_in: AtletaIn = Body(...),
 ):
     categoria_nome = atleta_in.categoria.nome
@@ -44,7 +44,7 @@ async def post(
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"A categoria {categoria_nome} não foi encontrada.",
+            detail=f'A categoria {categoria_nome} não foi encontrada.',
         )
 
     centro_treinamento = (
@@ -60,7 +60,7 @@ async def post(
     if not centro_treinamento:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"O centro de treinamento {centro_treinamento_nome} não foi encontrado.",
+            detail=f'O centro de treinamento {centro_treinamento_nome} não foi encontrado.',
         )
     try:
         atleta_out = AtletaOut(
@@ -70,7 +70,7 @@ async def post(
         atleta_out.cpf = cpf
 
         atleta_model = AtletaModel(
-            **atleta_out.model_dump(exclude={"categoria", "centro_treinamento"})
+            **atleta_out.model_dump(exclude={'categoria', 'centro_treinamento'})
         )
 
         atleta_model.categoria_id = categoria.pk_id
@@ -81,20 +81,20 @@ async def post(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe um atleta cadastrado com o cpf: {cpf}",
+            detail=f'Já existe um atleta cadastrado com o cpf: {cpf}',
         )
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ocorreu um erro ao inserir os dados no banco",
+            detail='Ocorreu um erro ao inserir os dados no banco',
         )
 
     return atleta_out
 
 
 @router.get(
-    "/",
-    summary="Consultar todos os Atletas",
+    '/',
+    summary='Consultar todos os Atletas',
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[AtletaGetOut],
 )
@@ -108,8 +108,8 @@ async def query(db_session: DatabaseDependency) -> LimitOffsetPage[AtletaGetOut]
 
 
 @router.get(
-    "/{id}",
-    summary="Consulta um Atleta pelo id",
+    '/{id}',
+    summary='Consulta um Atleta pelo id',
     status_code=status.HTTP_200_OK,
     response_model=AtletaOut,
 )
@@ -123,15 +123,15 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> AtletaOut:
     if not atleta:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Atleta não encontrado no id: {id}",
+            detail=f'Atleta não encontrado no id: {id}',
         )
 
     return atleta
 
 
 @router.patch(
-    "/{id}",
-    summary="Editar um Atleta pelo id",
+    '/{id}',
+    summary='Editar um Atleta pelo id',
     status_code=status.HTTP_200_OK,
     response_model=AtletaOut,
 )
@@ -147,7 +147,7 @@ async def patch(
     if not atleta:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Atleta não encontrado no id: {id}",
+            detail=f'Atleta não encontrado no id: {id}',
         )
 
     atleta_update = atleta_up.model_dump(exclude_unset=True)
@@ -159,13 +159,13 @@ async def patch(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe um atleta cadastrado com o cpf: {atleta.cpf}",
+            detail=f'Já existe um atleta cadastrado com o cpf: {atleta.cpf}',
         )
     return atleta
 
 
 @router.delete(
-    "/{id}", summary="Deletar um Atleta pelo id", status_code=status.HTTP_204_NO_CONTENT
+    '/{id}', summary='Deletar um Atleta pelo id', status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
     atleta: AtletaOut = (
@@ -177,7 +177,7 @@ async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
     if not atleta:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Atleta não encontrado no id: {id}",
+            detail=f'Atleta não encontrado no id: {id}',
         )
 
     await db_session.delete(atleta)

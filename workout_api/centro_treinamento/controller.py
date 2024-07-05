@@ -3,8 +3,9 @@ from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
-from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
+
 from workout_api.centro_treinamento.models import CentroTreinamentoModel
 from workout_api.centro_treinamento.schemas import (
     CentroTreinamentoIn,
@@ -17,8 +18,8 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
-    summary="Criar um novo Centro de treinamento",
+    '/',
+    summary='Criar um novo Centro de treinamento',
     status_code=status.HTTP_201_CREATED,
     response_model=CentroTreinamentoOut,
 )
@@ -38,15 +39,15 @@ async def post(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento_out.nome}",
+            detail=f'Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento_out.nome}',
         )
 
     return centro_treinamento_out
 
 
 @router.get(
-    "/",
-    summary="Consultar todos os centros de treinamento",
+    '/',
+    summary='Consultar todos os centros de treinamento',
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[CentroTreinamentoOut],
 )
@@ -59,8 +60,8 @@ async def query(db_session: DatabaseDependency) -> list[CentroTreinamentoOut]:
 
 
 @router.get(
-    "/{id}",
-    summary="Consulta um centro de treinamento pelo id",
+    '/{id}',
+    summary='Consulta um centro de treinamento pelo id',
     status_code=status.HTTP_200_OK,
     response_model=CentroTreinamentoOut,
 )
@@ -74,15 +75,15 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CentroTreinamentoOut
     if not centro_treinamento_out:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Centro de treinamento não encontrado no id: {id}",
+            detail=f'Centro de treinamento não encontrado no id: {id}',
         )
 
     return centro_treinamento_out
 
 
 @router.patch(
-    "/{id}",
-    summary="Editar uma Centro treinamento pelo id",
+    '/{id}',
+    summary='Editar uma Centro treinamento pelo id',
     status_code=status.HTTP_200_OK,
     response_model=CentroTreinamentoOut,
 )
@@ -100,7 +101,7 @@ async def patch(
     if not centro_treinamento:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Centro treinamento não encontrado no id: {id}",
+            detail=f'Centro treinamento não encontrado no id: {id}',
         )
 
     centro_treinamento_update = centro_treinamento_up.model_dump(exclude_unset=True)
@@ -113,15 +114,15 @@ async def patch(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento.nome}",
+            detail=f'Já existe um centro de treinamento cadastrado com o nome: {centro_treinamento.nome}',
         )
 
     return centro_treinamento
 
 
 @router.delete(
-    "/{id}",
-    summary="Deletar uma Centro treinamento pelo id",
+    '/{id}',
+    summary='Deletar uma Centro treinamento pelo id',
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
@@ -134,7 +135,7 @@ async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
     if not centro_treinamento:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Centro treinamento não encontrado no id: {id}",
+            detail=f'Centro treinamento não encontrado no id: {id}',
         )
 
     await db_session.delete(centro_treinamento)

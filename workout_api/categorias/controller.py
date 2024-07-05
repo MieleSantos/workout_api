@@ -3,8 +3,9 @@ from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
 from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
-from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
+
 from workout_api.categorias.models import CategoriaModel
 from workout_api.categorias.schemas import CategoriaIn, CategoriaOut
 from workout_api.contrib.dependencies import DatabaseDependency
@@ -13,8 +14,8 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
-    summary="Criar uma nova Categoria",
+    '/',
+    summary='Criar uma nova Categoria',
     status_code=status.HTTP_201_CREATED,
     response_model=CategoriaOut,
 )
@@ -29,15 +30,15 @@ async def post(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe uma categoria cadastrado com o nome: {categoria_in.nome}",
+            detail=f'Já existe uma categoria cadastrado com o nome: {categoria_in.nome}',
         )
 
     return categoria_out
 
 
 @router.get(
-    "/",
-    summary="Consultar todas as Categorias",
+    '/',
+    summary='Consultar todas as Categorias',
     status_code=status.HTTP_200_OK,
     response_model=LimitOffsetPage[CategoriaOut],
 )
@@ -50,8 +51,8 @@ async def query(db_session: DatabaseDependency) -> list[CategoriaOut]:
 
 
 @router.get(
-    "/{id}",
-    summary="Consulta uma Categoria pelo id",
+    '/{id}',
+    summary='Consulta uma Categoria pelo id',
     status_code=status.HTTP_200_OK,
     response_model=CategoriaOut,
 )
@@ -65,15 +66,15 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CategoriaOut:
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Categoria não encontrada no id: {id}",
+            detail=f'Categoria não encontrada no id: {id}',
         )
 
     return categoria
 
 
 @router.patch(
-    "/{id}",
-    summary="Editar uma categoria pelo id",
+    '/{id}',
+    summary='Editar uma categoria pelo id',
     status_code=status.HTTP_200_OK,
     response_model=CategoriaOut,
 )
@@ -89,7 +90,7 @@ async def patch(
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Categoria não encontrado no id: {id}",
+            detail=f'Categoria não encontrado no id: {id}',
         )
 
     categoria_update = categoria_up.model_dump(exclude_unset=True)
@@ -101,14 +102,14 @@ async def patch(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_303_SEE_OTHER,
-            detail=f"Já existe uma categoria cadastrado com o nome: {categoria_up.nome}",
+            detail=f'Já existe uma categoria cadastrado com o nome: {categoria_up.nome}',
         )
     return categoria
 
 
 @router.delete(
-    "/{id}",
-    summary="Deletar uma categoria pelo id",
+    '/{id}',
+    summary='Deletar uma categoria pelo id',
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
@@ -121,7 +122,7 @@ async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Atleta não encontrado no id: {id}",
+            detail=f'Atleta não encontrado no id: {id}',
         )
 
     await db_session.delete(categoria)

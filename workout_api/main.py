@@ -3,7 +3,7 @@ from fastapi_pagination import add_pagination
 
 from workout_api.routers import api_router
 
-app = FastAPI(title="WorkoutApi")
+app = FastAPI(title='WorkoutApi')
 
 add_pagination(app)
 
