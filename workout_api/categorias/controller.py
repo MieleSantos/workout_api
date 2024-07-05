@@ -73,7 +73,7 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CategoriaOut:
     response_model=CategoriaOut,
 )
 async def patch(
-    id: UUID4, db_session: DatabaseDependency, atleta_up: CategoriaIn = Body(...)
+    id: UUID4, db_session: DatabaseDependency, categoria_up: CategoriaIn = Body(...)
 ) -> CategoriaOut:
     categoria: CategoriaOut = (
         (await db_session.execute(select(CategoriaModel).filter_by(id=id)))
@@ -87,8 +87,8 @@ async def patch(
             detail=f"Categoria não encontrado no id: {id}",
         )
 
-    atleta_update = atleta_up.model_dump(exclude_unset=True)
-    for key, value in atleta_update.items():
+    categoria_update = categoria_up.model_dump(exclude_unset=True)
+    for key, value in categoria_update.items():
         setattr(categoria, key, value)
 
     await db_session.commit()
