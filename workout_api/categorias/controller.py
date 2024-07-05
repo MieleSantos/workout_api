@@ -64,3 +64,56 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CategoriaOut:
         )
 
     return categoria
+
+
+@router.patch(
+    "/{id}",
+    summary="Editar uma categoria pelo id",
+    status_code=status.HTTP_200_OK,
+    response_model=CategoriaOut,
+)
+async def patch(
+    id: UUID4, db_session: DatabaseDependency, atleta_up: CategoriaIn = Body(...)
+) -> CategoriaOut:
+    categoria: CategoriaOut = (
+        (await db_session.execute(select(CategoriaModel).filter_by(id=id)))
+        .scalars()
+        .first()
+    )
+
+    if not categoria:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Categoria não encontrado no id: {id}",
+        )
+
+    atleta_update = atleta_up.model_dump(exclude_unset=True)
+    for key, value in atleta_update.items():
+        setattr(categoria, key, value)
+
+    await db_session.commit()
+    await db_session.refresh(categoria)
+
+    return categoria
+
+
+@router.delete(
+    "/{id}",
+    summary="Deletar uma categoria pelo id",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete(id: UUID4, db_session: DatabaseDependency) -> None:
+    categoria: CategoriaOut = (
+        (await db_session.execute(select(CategoriaModel).filter_by(id=id)))
+        .scalars()
+        .first()
+    )
+
+    if not categoria:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Atleta não encontrado no id: {id}",
+        )
+
+    await db_session.delete(categoria)
+    await db_session.commit()
