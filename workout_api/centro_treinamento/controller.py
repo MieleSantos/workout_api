@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, HTTPException, status
+from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
 from sqlalchemy.future import select
 
@@ -15,8 +16,8 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
-    summary="Criar um novo Centro de treinamento",
+    '/',
+    summary='Criar um novo Centro de treinamento',
     status_code=status.HTTP_201_CREATED,
     response_model=CentroTreinamentoOut,
 )
@@ -38,22 +39,22 @@ async def post(
 
 
 @router.get(
-    "/",
-    summary="Consultar todos os centros de treinamento",
+    '/',
+    summary='Consultar todos os centros de treinamento',
     status_code=status.HTTP_200_OK,
-    response_model=list[CentroTreinamentoOut],
+    response_model=LimitOffsetPage[CentroTreinamentoOut],
 )
 async def query(db_session: DatabaseDependency) -> list[CentroTreinamentoOut]:
     centros_treinamento_out: list[CentroTreinamentoOut] = (
         (await db_session.execute(select(CentroTreinamentoModel))).scalars().all()
     )
 
-    return centros_treinamento_out
+    return paginate(centros_treinamento_out)
 
 
 @router.get(
-    "/{id}",
-    summary="Consulta um centro de treinamento pelo id",
+    '/{id}',
+    summary='Consulta um centro de treinamento pelo id',
     status_code=status.HTTP_200_OK,
     response_model=CentroTreinamentoOut,
 )
@@ -67,7 +68,7 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CentroTreinamentoOut
     if not centro_treinamento_out:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Centro de treinamento não encontrado no id: {id}",
+            detail=f'Centro de treinamento não encontrado no id: {id}',
         )
 
     return centro_treinamento_out

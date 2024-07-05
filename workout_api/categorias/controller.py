@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, HTTPException, status
+from fastapi_pagination import LimitOffsetPage, paginate
 from pydantic import UUID4
 from sqlalchemy.future import select
 
@@ -12,8 +13,8 @@ router = APIRouter()
 
 
 @router.post(
-    '/',
-    summary='Criar uma nova Categoria',
+    "/",
+    summary="Criar uma nova Categoria",
     status_code=status.HTTP_201_CREATED,
     response_model=CategoriaOut,
 )
@@ -30,22 +31,22 @@ async def post(
 
 
 @router.get(
-    '/',
-    summary='Consultar todas as Categorias',
+    "/",
+    summary="Consultar todas as Categorias",
     status_code=status.HTTP_200_OK,
-    response_model=list[CategoriaOut],
+    response_model=LimitOffsetPage[CategoriaOut],
 )
 async def query(db_session: DatabaseDependency) -> list[CategoriaOut]:
     categorias: list[CategoriaOut] = (
         (await db_session.execute(select(CategoriaModel))).scalars().all()
     )
 
-    return categorias
+    return paginate(categorias)
 
 
 @router.get(
-    '/{id}',
-    summary='Consulta uma Categoria pelo id',
+    "/{id}",
+    summary="Consulta uma Categoria pelo id",
     status_code=status.HTTP_200_OK,
     response_model=CategoriaOut,
 )
@@ -59,7 +60,7 @@ async def get(id: UUID4, db_session: DatabaseDependency) -> CategoriaOut:
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Categoria não encontrada no id: {id}',
+            detail=f"Categoria não encontrada no id: {id}",
         )
 
     return categoria
