@@ -18,58 +18,44 @@ Esta é uma API de competição de crossfit chamada WorkoutAPI (isso mesmo rs, e
 
 A API foi desenvolvida utilizando o `fastapi` (async), junto das seguintes libs: `alembic`, `SQLAlchemy`, `pydantic`. Para salvar os dados está sendo utilizando o `postgres`, por meio do `docker`.
 
+
 ## Execução da API
 
-Para executar o projeto, utilizei a [pyenv](https://github.com/pyenv/pyenv), com a versão 3.11.4 do `python` para o ambiente virtual.
-
-Caso opte por usar pyenv, após instalar, execute:
+Para executar o projeto, utilizei o [poetry](https://python-poetry.org/).Com o poetry instalado, execute o comando para instalar as dependências:
 
 ```bash
-pyenv virtualenv 3.11.4 workoutapi
-pyenv activate workoutapi
-pip install -r requirements.txt
+poetry install
 ```
-Para subir o banco de dados, caso não tenha o [docker-compose](https://docs.docker.com/compose/install/linux/) instalado, faça a instalação e logo em seguida, execute:
+
+Crie um arquivo `.env` na raiz do projeto, para especifica a url para conecta com o banco de dados, exemplo
+de  url:
+```
+DB_URL="postgresql+asyncpg://workout:workout@db:5432/workout"
+```
+
+A APi esta configurada para ser executada no container docker, para executa, use o comando:
+
+```
+docker compose up --build -d
+```
+
+
+
+Esse comando vai subir os container do banco de dados e da api, depois precisa fazer as migrações no banco, para isso
+ative o `env` com `poetry shell` e execute:
+
 
 ```bash
-make run-docker
-```
-Para criar uma migration nova, execute:
-
-```bash
-make create-migrations d="nome_da_migration"
+task upgrade_alembic
 ```
 
-Para criar o banco de dados, execute:
+> **Nota:** task são tarefas configuradas usando a biblioteca [taskipy](https://github.com/taskipy/taskipy) para automatiza tarefas, ela esta configurada no `pyproject.tmol` na seção `[tool.taskipy.tasks]`, onde tem os comando mapeados
 
-```bash
-make run-migrations
-```
+Além das migrações no taskipy, tem comando para fazer as formatações e lint 
 
-## API
+Com os container executando e as migrações feitas, basta acessa: `http://127.0.0.1:8000/docs` para acessa a documentação do swagger e testa a api
 
-Para subir a API, execute:
-```bash
-make run
-```
-e acesse: http://127.0.0.1:8000/docs
 
-# Desafio Final
-    - adicionar query parameters nos endpoints
-        - atleta
-            - nome
-            - cpf
-    - customizar response de retorno de endpoints
-        - get all
-            - atleta
-                - nome
-                - centro_treinamento
-                - categoria
-    - Manipular exceção de integridade dos dados em cada módulo/tabela
-        - sqlalchemy.exc.IntegrityError e devolver a seguinte mensagem: “Já existe um atleta cadastrado com o cpf: x”
-        - status_code: 303
-    - Adicionar paginação utilizando a lib: fastapi-pagination
-        - limit e offset
 # Referências
 
 FastAPI: https://fastapi.tiangolo.com/
