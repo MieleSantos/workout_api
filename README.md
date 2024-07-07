@@ -56,6 +56,10 @@ Além das migrações no taskipy, tem comando para fazer as formatações e lint
 Com os container executando e as migrações feitas, basta acessa: `http://127.0.0.1:8000/docs` para acessa a documentação do swagger e testa a api
 
 
+# Ratas da Api
+
+![Rotas da Api](/api_swagger.png)
+
 # Referências
 
 FastAPI: https://fastapi.tiangolo.com/
