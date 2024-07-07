@@ -1,10 +1,25 @@
-version: "3"
 services:
   db:
     image: postgres:16-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: workout
       POSTGRES_USER: workout
       POSTGRES_DB: workout
+      POSTGRES_PASSWORD: workout
     ports:
       - "5432:5432"
+
+  workout_api:
+    image: workout_api
+    entrypoint: ./entrypoint.sh
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+asyncpg://workout:workout@db:5432/workout
+   
+volumes:
+  pgdata:
